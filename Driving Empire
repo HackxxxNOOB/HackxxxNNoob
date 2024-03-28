@@ -63,7 +63,7 @@
         end)
         
         local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Simak90/pfsetcetc/main/fluxed.lua"))() -- UI Library
-                local win = lib:Window("MaxHub", "Signed By JMaxeyy", Color3.fromRGB(255, 0, 0), _G.closeBind) -- done mess with
+                local win = lib:Window("HackxxxNoob", "fuck you", Color3.fromRGB(157, 108, 180), _G.closeBind) -- done mess with
             
                 ---------Spins--------------------------------
                 local Visual = win:Tab("Farm Section", "http://www.roblox.com/asset/?id=6023426915")
