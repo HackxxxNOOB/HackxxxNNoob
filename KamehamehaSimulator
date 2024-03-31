@@ -48,7 +48,7 @@ local function inf_spin()
             task.wait()
         end 
 end
-local ui = Library:NewWindow("idk name of game")
+local ui = Library:NewWindow("Noob game")
 
 local auto = ui:NewSection("rich")
 
