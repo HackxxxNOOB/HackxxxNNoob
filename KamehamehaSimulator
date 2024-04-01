@@ -48,6 +48,20 @@ local function inf_spin()
             task.wait()
         end 
 end
+local function re_birth()
+        while _G.re_birth do
+        local args = {
+                [1] = 1
+           }
+
+           game:GetService("ReplicatedStorage").Remotes.Rebirth:InvokeServer(unpack(args))
+           task.wait()
+        end
+    end
+end
+    
+
+
 local ui = Library:NewWindow("Noob game")
 
 local auto = ui:NewSection("rich")
@@ -70,4 +84,8 @@ end)
 auto:CreateToggle("inf spins", function(value)
         _G.inf_spin = value
         inf_spin()
+end)
+auto:CreateToggle("Auto Rebirth", function(value)
+        _G.re_birth = value
+        re_birth()
 end)
