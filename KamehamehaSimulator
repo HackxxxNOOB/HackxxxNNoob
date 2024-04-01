@@ -57,7 +57,6 @@ local function re_birth()
            game:GetService("ReplicatedStorage").Remotes.Rebirth:InvokeServer(unpack(args))
            task.wait()
         end
-    end
 end
     
 
