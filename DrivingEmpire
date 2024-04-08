@@ -1,0 +1,269 @@
+--Vars
+LocalPlayer = game:GetService("Players").LocalPlayer
+Camera = workspace.CurrentCamera
+VirtualUser = game:GetService("VirtualUser")
+MarketplaceService = game:GetService("MarketplaceService")
+
+--Get Current Vehicle
+function GetCurrentVehicle()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.SeatPart and LocalPlayer.Character.Humanoid.SeatPart.Parent
+end
+
+--Regular TP
+function TP(cframe)
+    GetCurrentVehicle():SetPrimaryPartCFrame(cframe)
+end
+
+--Velocity TP
+function VelocityTP(cframe)
+    TeleportSpeed = math.random(500, 500)
+    Car = GetCurrentVehicle()
+    local BodyGyro = Instance.new("BodyGyro", Car.PrimaryPart)
+    BodyGyro.P = 5000
+    BodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+    BodyGyro.CFrame = Car.PrimaryPart.CFrame
+    local BodyVelocity = Instance.new("BodyVelocity", Car.PrimaryPart)
+    BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    BodyVelocity.Velocity = CFrame.new(Car.PrimaryPart.Position, cframe.p).LookVector * TeleportSpeed
+    wait((Car.PrimaryPart.Position - cframe.p).Magnitude / TeleportSpeed)
+    BodyVelocity.Velocity = Vector3.new()
+    wait(0.1)
+    BodyVelocity:Destroy()
+    BodyGyro:Destroy()
+end
+
+--Auto Farm
+StartPosition = CFrame.new(Vector3.new(4940.19775, 66.0195084, -1933.99927, 0.343969434, -0.00796990748, -0.938947022, 0.00281227613, 0.999968231, -0.00745762791, 0.938976645, -7.53822824e-05, 0.343980938), Vector3.new())
+EndPosition = CFrame.new(Vector3.new(1827.3407, 66.0150146, -658.946655, -0.366112858, 0.00818905979, 0.930534422, 0.00240773871, 0.999966264, -0.00785277691, -0.930567324, -0.000634518801, -0.366120219), Vector3.new())
+AutoFarmFunc = coroutine.create(function()
+    while wait() do
+        if not AutoFarm then
+            AutoFarmRunning = false
+            coroutine.yield()
+        end
+        AutoFarmRunning = true
+        pcall(function()
+            if not GetCurrentVehicle() and tick() - (LastNotif or 0) > 5 then
+                LastNotif = tick()
+            else
+                TP(StartPosition + (TouchTheRoad and Vector3.new(0,0,0) or Vector3.new(0, 0, 0)))
+                VelocityTP(EndPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 0, 0)))
+                TP(EndPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 0, 0)))
+                VelocityTP(StartPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 0, 0)))
+            end
+        end)
+    end
+end)
+
+--Anti AFK
+AntiAFK = true
+LocalPlayer.Idled:Connect(function()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new(), Camera.CFrame)
+end)
+
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Fluent" ,
+    SubTitle = "x_qxer9",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(480, 350),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Aqua",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+--Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
+    misc = Window:AddTab({ Title = "Misc", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+local Options = Fluent.Options
+
+do
+    Fluent:Notify({
+        Title = "By x2hookhook",
+        Content = "This is a notification",
+        SubContent = "SubContent", -- Optional
+        Duration = 5 -- Set to nil to make the notification not disappear
+    })
+
+
+
+    Tabs.Main:AddParagraph({
+        Title = "driving empire",
+        Content = "The best scripts for free"
+    })
+
+    local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Farm", Default = false })
+
+    Toggle:OnChanged(function(value)
+        TouchTheRoad = value
+        AutoFarm = value
+                 if value and not AutoFarmRunning then
+                     coroutine.resume(AutoFarmFunc)
+                 end
+    end)
+    Options.MyToggle:SetValue(false)
+
+
+    local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "AntiAFK", Default = true })
+
+    Toggle:OnChanged(function(value)
+        AntiAFK = value
+    end)
+    Options.MyToggle:SetValue(true)
+
+
+    Tabs.misc:AddButton({
+        Title = "Rejoin Server",
+        Description = "Press it and it will automatically exit and re-enter",
+        Callback = function()
+            Window:Dialog({
+                Title = "Title",
+                Content = "This is a dialog",
+                Buttons = {
+                    {
+                        Title = "Confirm",
+                        Callback = function()
+                            local ts = game:GetService("TeleportService")
+	                        local p = game:GetService("Players").LocalPlayer
+	                        ts:Teleport(game.PlaceId, p)
+                        end
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+
+    
+
+    Tabs.misc:AddButton({
+        Title = "Fps Booster",
+        Description = "Boost your fps",
+        Callback = function()
+            Window:Dialog({
+                Title = "Title",
+                Content = "This is a dialog",
+                Buttons = {
+                    {
+                        Title = "Confirm",
+                        Callback = function()
+                            FPSBooster()
+                        end
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+    
+    function FPSBooster()
+    repeat task.wait() until game:IsLoaded()
+    task.wait(12)
+    for i, v in pairs(game:GetService("Workspace"):GetDescendants()) do 
+        if v:IsA("BasePart") or v:IsA("Part") or v:IsA("MeshPart") then 
+            v.Transparency = 1
+        end
+    end
+    
+    game:GetService("Workspace").ChildAdded:Connect(function(v) 
+        if v:IsA("BasePart") or v:IsA("Part") or v:IsA("MeshPart") then 
+            v.Transparency = 1
+        end
+    end)
+    
+    for i, v in pairs(game:GetService("ReplicatedStorage").Effect.Container:GetDescendants()) do
+        if not v:IsA("ModuleScript") and not v:IsA("Folder") then 
+            v:Destroy()
+        end
+    end
+    game:GetService("ReplicatedStorage").Effect.Container.ChildAdded:Connect(function(v) 
+        if not v:IsA("ModuleScript") and not v:IsA("Folder") then 
+            v:Destroy()
+        end
+    end)
+    
+    for i, v in pairs(game:GetService("ReplicatedStorage").FX:GetDescendants()) do 
+        pcall(function()
+            v:Destroy()
+        end)
+    end
+    game:GetService("ReplicatedStorage").FX.ChildAdded:Connect(function(v) 
+        pcall(function()
+            v:Destroy()
+        end)
+    end)
+
+    
+   
+
+    local Input = Tabs.Settings:AddInput("Input", {
+        Title = "Input",
+        Default = "Default",
+        Placeholder = "Placeholder",
+        Numeric = false, -- Only allows numbers
+        Finished = false, -- Only calls callback when you press enter
+        Callback = function(Value)
+            print("Input changed:", Value)
+        end
+    })
+
+    Input:OnChanged(function()
+        print("Input updated:", Input.Value)
+    end)
+end
+
+
+-- Addons:
+-- SaveManager (Allows you to have a configuration system)
+-- InterfaceManager (Allows you to have a interface managment system)
+
+-- Hand the library over to our managers
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+-- Ignore keys that are used by ThemeManager.
+-- (we dont want configs to save themes, do we?)
+SaveManager:IgnoreThemeSettings()
+
+-- You can add indexes of elements the save manager should ignore
+SaveManager:SetIgnoreIndexes({})
+
+-- use case for doing it this way:
+-- a script hub could have themes in a global folder
+-- and game configs in a separate folder per game
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config
+-- which has been marked to be one that auto loads!
+SaveManager:LoadAutoloadConfig()
